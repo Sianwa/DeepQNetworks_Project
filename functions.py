@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 import oandapyV20
 from oandapyV20 import API
 import oandapyV20.endpoints.accounts as accounts
+import oandapyV20.endpoints.positions as positions
+import oandapyV20.endpoints.trades as trades
 import oandapyV20.endpoints.orders as orders
+from oandapyV20.exceptions import V20Error
 from oandapyV20.contrib.requests import (
     MarketOrderRequest,
     TakeProfitDetails,
@@ -42,9 +45,10 @@ def forexdata_loader(currency_pair):
     forex_data = data_reader.DataReader(currency_pair,
                             "av-forex-daily",
                              api_key=api_key,
-                             start='2010-1-1',
-                             end='2010-12-31')
-
+                             start='2017-1-1',        
+                             end='2020-12-31')
+#TRAINING DATES 2010-2013
+#TESTING DATES 2019-2020
     close = forex_data['close']
 
     #next we want to add the indicators to our dataset
@@ -144,10 +148,10 @@ def getAccountDetails():
 
 #-------------------------------------------------------oanda function to place market order
 
-def placeMrketOrder():
+def placeMrketOrder(currency_pair, lot_size):
     client_obj = oandapyV20.API(access_token = token)
-    mktOrder = MarketOrderRequest( instrument = "GBP_USD",
-                                    units = 1000,
+    mktOrder = MarketOrderRequest( instrument = currency_pair,
+                                    units = lot_size,
                                     ).data
     client_request = orders.OrderCreate(accountID = accountID, data = mktOrder)
     try: 
@@ -156,4 +160,49 @@ def placeMrketOrder():
         print("ERROR OCCURED DUE TO : {}".format(err))
     else:        
         response = json.dumps(rv, indent = 2)
-        return  response
+        data = json.loads(response)
+
+        return  data["orderCreateTransaction"]["id"]
+
+#-----------------------------------------------------------close specific position
+
+def closePosition(trade_id):
+    client_obj = oandapyV20.API(access_token = token)
+    client_request = trades.TradeClose(accountID = accountID, tradeID = trade_id)
+
+    try:
+        rv = client_obj.request(client_request)
+    except V20Error as err:
+        print("ERROR OCCURED DUE TO : {}".format(err))
+    else:
+        response = json.dumps(rv, indent=2)
+        return response
+
+#-----------------------------------------------------------------close all open positions        
+
+def killSwitch(currency_pair):
+    client = oandapyV20.API(access_token = token)
+    data = { "longUnits" : "ALL"}
+
+    client_request = positions.PositionClose(accountID = accountID,
+                                            instrument= currency_pair,
+                                            data = data)
+    try:
+        rv = client.request(client_request)
+    except V20Error as err:
+        print("ERROR OCCURED DUE TO : {}".format(err))
+    else:
+        response = json.dumps(rv, indent = 2)
+        return response
+
+#--------------------------------------------------------------plot reward per episode
+def plot_totalReward(dataframe):
+    title = "Model's Performance: Reward per Episode"
+    plt.figure(figsize=(12,5))
+    plt.scatter(dataframe.index, dataframe['Reward'], color='blue',alpha=1)
+
+    plt.title(title)
+    plt.xlabel('Episode',fontsize=12)
+    plt.ylabel('Rewards:Profit/Loss',fontsize=12)
+
+    return plt.show()
