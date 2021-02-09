@@ -28,7 +28,7 @@ class AI_Trader:
 
     def _model(self):
         model = Sequential()
-        model.add(Dense(units=64, input_shape=(3,4), activation="relu"))
+        model.add(Dense(units=64, input_shape=(7,4), activation="relu"))
         model.add(Dense(units=32, activation="relu"))
         model.add(Dense(units=8, activation="relu"))
         model.add(Dense(self.action_size, activation="linear"))

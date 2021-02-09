@@ -45,8 +45,8 @@ def forexdata_loader(currency_pair):
     forex_data = data_reader.DataReader(currency_pair,
                             "av-forex-daily",
                              api_key=api_key,
-                             start='2017-1-1',        
-                             end='2020-12-31')
+                             start='2019-1-1',        
+                             end='2019-12-31')
 #TRAINING DATES 2010-2013
 #TESTING DATES 2019-2020
     close = forex_data['close']
@@ -131,7 +131,7 @@ def plotData(dataSet):
     plt.ylabel('Price Value',fontsize=12)
     plt.legend(dataSet.columns.values, loc='upper left')
 
-    return plt.show()
+    return plt.savefig('episode.png')
 #
 
 #------------------------------------------------------oanda function to return account details

@@ -6,14 +6,14 @@ from functions import *
 from tqdm import tqdm
 import sys
 
-trained_model = load_model("models/ai_trader_6.h5")
+trained_model = load_model("models/ai_trader_30.h5")
 
 #hyperparameters
-window_size = 3
+window_size = 5
 batch_size = 32
 data = forexdata_loader("EUR/USD")
 data_samples = len(data) - 1
-trader = AI_Trader(window_size, False, "ai_trader_6.h5")
+trader = AI_Trader(window_size, False, "ai_trader_30.h5")
 
 state = CreateState(data, 0, window_size + 1)
 total_profit = 0
